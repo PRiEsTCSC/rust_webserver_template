@@ -190,27 +190,35 @@
 # """
 
 
-
 [template]
 cargo_generate_version = ">=0.18.0"
-ignore = [".git", "Cargo.lock", ".env", "Dockerfile", "docker-compose.yml"]
-
-[placeholders.database]
-type = "string"
-prompt = "Choose your database: - postgres: PostgreSQL, a powerful relational database (requires a server). - mysql: MySQL, a popular relational database (requires a server). - sqlite: SQLite, a lightweight, file-based database (no server needed)."
-choices = ["postgres", "mysql", "sqlite"]
-default = "sqlite"
-description = "The database backend for your project."
+ignore = [
+    ".git",
+    "Cargo.lock",
+    ".env",
+    "Dockerfile",
+    "docker-compose.yml",
+    "read.txt",
+]
 
 [placeholders.description]
 type = "string"
-prompt = "Provide a short description of your project. This will appear in Cargo.toml and documentation."
-default = "A Rust web server application built with Actix and {{database}}."
+prompt = "Provide a short description of your project. This will appear in Cargo.toml and documentation (e.g., 'A Rust web server with Actix and your chosen database')."
+default = "A Rust web server application built with Actix"
 
 [placeholders.author_name]
 type = "string"
 prompt = "Enter your name. This will be listed as the author in Cargo.toml."
 default = "Your Name"
+
+[placeholders.database]
+prompt = "Choose your database:
+- postgres: PostgreSQL, a powerful relational database (requires a server).
+- mysql: MySQL, a popular relational database (requires a server).
+- sqlite: SQLite, a lightweight, file-based database (no server needed)."type = "string"
+choices = ["postgres", "mysql", "sqlite"]
+default = "sqlite"
+description = "The database backend for your project."
 
 [placeholders.db_name]
 type = "string"
@@ -279,45 +287,45 @@ CMD ["./{{project-name}}"]
 template = """
 version: '3.8'
 services:
-app:
+  app:
     build: .
     ports:
-    - "{{server_port}}:{{server_port}}"
+      - "{{server_port}}:{{server_port}}"
     {% if database == "postgres" %}
     depends_on:
-    - db
+      - db
     {% elsif database == "mysql" %}
     depends_on:
-    - db
+      - db
     {% endif %}
     {% if include_env %}
     env_file:
-    - .env
+      - .env
     {% endif %}
     environment:
-    - RUST_LOG=info
-{% if database == "postgres" %}
-db:
+      - RUST_LOG=info
+  {% if database == "postgres" %}
+  db:
     image: postgres:15
     environment:
-    - POSTGRES_DB={{db_name}}
-    - POSTGRES_USER=user
-    - POSTGRES_PASSWORD=password
+      - POSTGRES_DB={{db_name}}
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
     volumes:
-    - db-data:/var/lib/postgresql/data
-{% elsif database == "mysql" %}
-db:
+      - db-data:/var/lib/postgresql/data
+  {% elsif database == "mysql" %}
+  db:
     image: mysql:8.0
     environment:
-    - MYSQL_DATABASE={{db_name}}
-    - MYSQL_ROOT_PASSWORD=password
-    - MYSQL_USER=user
-    - MYSQL_PASSWORD=password
+      - MYSQL_DATABASE={{db_name}}
+      - MYSQL_ROOT_PASSWORD=password
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=password
     volumes:
-    - db-data:/var/lib/mysql
-{% endif %}
+      - db-data:/var/lib/mysql
+  {% endif %}
 {% if database == "postgres" || database == "mysql" %}
 volumes:
-db-data:
+  db-data:
 {% endif %}
 """
