@@ -62,6 +62,13 @@
 cargo_generate_version = ">=0.18.0"
 ignore = [".git", "Cargo.lock", ".env", "Dockerfile", "docker-compose.yml"]
 
+[placeholders.database]
+type = "string"
+prompt = "Choose your database: - postgres: PostgreSQL, a powerful relational database (requires a server). - mysql: MySQL, a popular relational database (requires a server). - sqlite: SQLite, a lightweight, file-based database (no server needed)."
+choices = ["postgres", "mysql", "sqlite"]
+default = "sqlite"
+description = "The database backend for your project."
+
 [placeholders.description]
 type = "string"
 prompt = "Provide a short description of your project. This will appear in Cargo.toml and documentation."
@@ -71,13 +78,6 @@ default = "A Rust web server application built with Actix and {{database}}."
 type = "string"
 prompt = "Enter your name. This will be listed as the author in Cargo.toml."
 default = "Your Name"
-
-[placeholders.database]
-type = "string"
-prompt = "Choose your database: - postgres: PostgreSQL, a powerful relational database (requires a server). - mysql: MySQL, a popular relational database (requires a server). - sqlite: SQLite, a lightweight, file-based database (no server needed)."
-choices = ["postgres", "mysql", "sqlite"]
-default = "sqlite"
-description = "The database backend for your project."
 
 [placeholders.db_name]
 type = "string"
