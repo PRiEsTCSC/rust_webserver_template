@@ -212,9 +212,7 @@ prompt = "Enter your name. This will be listed as the author in Cargo.toml."
 default = "Your Name"
 
 [placeholders.database]
-prompt = "Choose your database:
-- postgres: PostgreSQL, a powerful relational database (requires a server).
-- mysql: MySQL, a popular relational database (requires a server).
+prompt = "Choose your database: - postgres: PostgreSQL, a powerful relational database (requires a server). mysql: MySQL, a popular relational database (requires a server).
 - sqlite: SQLite, a lightweight, file-based database (no server needed)."type = "string"
 choices = ["postgres", "mysql", "sqlite"]
 default = "sqlite"
