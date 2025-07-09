@@ -4,10 +4,6 @@ mod routes;
 mod models;
 mod middleware;
 
-{% if include_logging == "true" %}
-
-use log::{error, info};
-
 fn main() {
     {% if include_logging == "true" %}
     // Initialize Logger
