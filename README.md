@@ -6,8 +6,9 @@ This beginner-friendly Rust web application template uses the **Actix web framew
 
 - **Fast Web Server**: Powered by Actix web with built-in logging and rate limiting.
 - **Database Ready**: Connects to {{database}} using SQLx for reliable database operations.
+- **CORS Support**: Optional Cross-Origin Resource Sharing for browser-based APIs.
+- **Docker Support**: Optional containerization for easy deployment.
 - **Quick Testing**: Includes a `/health` endpoint to check if your server is running.
-- **Flexible**: Easily add new endpoints or database features.
 
 ## What You’ll Need
 
@@ -22,16 +23,18 @@ Before you begin, ensure you have the following:
   ```sh
   cargo install cargo-generate
   ```
-- **Database**:
-  {% if database == "sqlite" %}
-  - **SQLite**: No extra setup needed! SQLite uses a file-based database that’s created automatically.
-  {% endif %}
-  {% if database == "postgres" %}
-  - **PostgreSQL**: A running PostgreSQL server. Download from [postgresql.org](https://www.postgresql.org/download/).
-  {% endif %}
-  {% if database == "mysql" %}
-  - **MySQL**: A running MySQL server. Download from [mysql.com](https://www.mysql.com/downloads/).
-  {% endif %}
+{% if database == "sqlite" %}
+- **SQLite**: No extra setup needed! SQLite uses a file-based database that’s created automatically.
+{% endif %}
+{% if database == "postgres" %}
+- **PostgreSQL**: A running PostgreSQL server. Download from [postgresql.org](https://www.postgresql.org/download/).
+{% endif %}
+{% if database == "mysql" %}
+- **MySQL**: A running MySQL server. Download from [mysql.com](https://www.mysql.com/downloads/).
+{% endif %}
+{% if use_docker %}
+- **Docker**: Install Docker and Docker Compose if you chose Docker support ([docker.com](https://www.docker.com/get-started)).
+{% endif %}
 
 ## Step-by-Step Setup
 
@@ -45,7 +48,15 @@ Follow these simple steps to get your project up and running. We’ll guide you 
    ```
 2. Answer the prompts:
    - **Project name**: Enter a name for your project (e.g., `myapp`). This will be your project folder and Rust package name.
-   - **Database**: Choose `postgres`, `mysql`, or `sqlite` based on your preference.
+   - **Description**: Provide a short project description (e.g., “My cool API”).
+   - **Author name**: Enter your name (e.g., “Jane Doe”).
+   - **Database**: Choose `postgres`, `mysql`, or `sqlite`.
+   - **Database name**: Choose a name for your database (e.g., `mydb`).
+   - **Generate .env file**: Choose whether to create a `.env` file with default settings.
+   - **Logging**: Decide if you want logging support.
+   - **CORS**: Decide if you need CORS for browser-based APIs.
+   - **Port**: Specify the server port (e.g., `8080`).
+   - **Docker**: Choose whether to include Docker configuration.
 
    This creates a new folder (e.g., `myapp`) containing all project files.
 
@@ -53,64 +64,70 @@ Follow these simple steps to get your project up and running. We’ll guide you 
 
 {% if database == "postgres" %}
 - **Install PostgreSQL**: Follow the instructions at [postgresql.org](https://www.postgresql.org/download/) for your operating system.
-- **Create a Database**: For example, to create a database named `mydb`, run:
+- **Create a Database**: Create a database named `{{db_name}}`:
   ```sh
-  psql -U postgres -c "CREATE DATABASE mydb;"
+  psql -U postgres -c "CREATE DATABASE {{db_name}};"
   ```
 - **Note**: Save your database username, password, and port (default: `5432`).
 {% endif %}
 {% if database == "mysql" %}
 - **Install MySQL**: Follow the instructions at [mysql.com](https://www.mysql.com/downloads/) for your operating system.
-- **Create a Database**: For example, to create a database named `mydb`, run:
+- **Create a Database**: Create a database named `{{db_name}}`:
   ```sh
-  mysql -u root -p -e "CREATE DATABASE mydb;"
+  mysql -u root -p -e "CREATE DATABASE {{db_name}};"
   ```
 - **Note**: Save your database username, password, and port (default: `3306`).
 {% endif %}
 {% if database == "sqlite" %}
-- **No Setup Needed**: SQLite is file-based, so you’ll just specify a file path (e.g., `mydb.sqlite`) in the next step.
+- **No Setup Needed**: SQLite is file-based, so a file (e.g., `{{db_name}}.sqlite`) will be created automatically when you run the app.
+{% endif %}
+{% if use_docker %}
+- **Docker Setup**: If you chose Docker, the `docker-compose.yml` file sets up the database automatically. See “Running with Docker” below.
 {% endif %}
 
 ### 3. Configure Your Environment
 
-1. Navigate to your project folder:
-   ```sh
-   cd {{project_name}}
-   ```
-2. Create a `.env` file in the project root to store configuration settings:
-   ```sh
-   echo "HOST=127.0.0.1" > .env
-   echo "PORT=8080" >> .env
-   echo "DATABASE_URL=<your_database_url>" >> .env
-   ```
-3. Set the `DATABASE_URL` based on your chosen database:
-   {% if database == "postgres" %}
-   ```sh
-   DATABASE_URL=postgres://<username>:<password>@localhost:5432/mydb
-   ```
-   **Example**: `postgres://myuser:mypass@localhost:5432/mydb`
-   {% endif %}
-   {% if database == "mysql" %}
-   ```sh
-   DATABASE_URL=mysql://<username>:<password>@localhost:3306/mydb
-   ```
-   **Example**: `mysql://myuser:mypass@localhost:3306/mydb`
-   {% endif %}
-   {% if database == "sqlite" %}
-   ```sh
-   DATABASE_URL=sqlite://mydb.sqlite
-   ```
-   **Example**: `sqlite://mydb.sqlite`
-   {% endif %}
-   **Tip**: Replace `<username>`, `<password>`, and `mydb` with your actual database credentials and name. For SQLite, use any valid file path (e.g., `./mydb.sqlite`).
+{% if include_env %}
+- A `.env` file was generated in your project folder with:
+  ```sh
+  HOST=127.0.0.1
+  PORT={{server_port}}
+  {% if database == "postgres" %}
+  DATABASE_URL=postgres://user:password@localhost:5432/{{db_name}}
+  {% elsif database == "mysql" %}
+  DATABASE_URL=mysql://user:password@localhost:3306/{{db_name}}
+  {% elsif database == "sqlite" %}
+  DATABASE_URL=sqlite://{{db_name}}.sqlite
+  {% endif %}
+  ```
+- Edit `.env` to replace `user` and `password` with your actual database credentials.
+{% else %}
+- Create a `.env` file in your project folder:
+  ```sh
+  HOST=127.0.0.1
+  PORT={{server_port}}
+  {% if database == "postgres" %}
+  DATABASE_URL=postgres://<username>:<password>@localhost:5432/{{db_name}}
+  {% elsif database == "mysql" %}
+  DATABASE_URL=mysql://<username>:<password>@localhost:3306/{{db_name}}
+  {% elsif database == "sqlite" %}
+  DATABASE_URL=sqlite://{{db_name}}.sqlite
+  {% endif %}
+  ```
+- Replace `<username>` and `<password>` with your database credentials. For SQLite, no credentials are needed.
+{% endif %}
 
 ### 4. Install Dependencies
 
+Navigate to your project folder:
+```sh
+cd {{project-name}}
+```
 Build the project to download and compile dependencies:
 ```sh
 cargo build
 ```
-This may take a few minutes the first time. If you encounter errors, check the **Troubleshooting** section below.
+This may take a few minutes the first time.
 
 ### 5. Run Your Application
 
@@ -118,31 +135,48 @@ Start the web server:
 ```sh
 cargo run
 ```
-- The server will start at `http://127.0.0.1:8080`.
+- The server will start at `http://127.0.0.1:{{server_port}}`.
 - To verify it’s working, open a new terminal and run:
   ```sh
-  curl http://127.0.0.1:8080/health
+  curl http://127.0.0.1:{{server_port}}/health
   ```
-- You should see: `Server is healthy`.
+- Expected output: `Server is healthy`.
 
-**Congratulations!** Your web server is up and running!
+{% if use_docker %}
+### Running with Docker
+
+1. Ensure Docker and Docker Compose are installed ([docker.com](https://www.docker.com/get-started)).
+2. From your project folder, run:
+   ```sh
+   docker-compose up --build
+   ```
+- This builds and starts your app and database (if using PostgreSQL or MySQL).
+- Access the server at `http://127.0.0.1:{{server_port}}/health`.
+- Stop the containers with `Ctrl+C` and clean up with:
+  ```sh
+  docker-compose down
+  ```
+{% endif %}
 
 ## What’s Included in Your Project?
 
-Here’s a breakdown of the key files in your project:
-
 | File/Folder             | Purpose                                                                 |
 |-------------------------|-------------------------------------------------------------------------|
-| `src/main.rs`           | The entry point of your app, setting up logging and starting the server. |
-| `src/init.rs`           | Configures the Actix web server with logging, rate limiting, and routes. |
+| `src/main.rs`           | The entry point, setting up logging and starting the server.             |
+| `src/init.rs`           | Configures the Actix web server with logging, rate limiting, and CORS.   |
 | `src/configs/env_load.rs` | Loads settings (`HOST`, `PORT`, `DATABASE_URL`) from the `.env` file.  |
 | `src/models/database.rs` | Manages the connection pool to your {{database}} database using SQLx.   |
 | `src/routes/health.rs`  | Defines the `/health` endpoint to check server status.                   |
 | `log4rs.yaml`           | Configures logging output (e.g., to the console or a file).              |
+{% if include_env %}
+| `.env`                  | Contains environment settings (HOST, PORT, DATABASE_URL).                |
+{% endif %}
+{% if use_docker %}
+| `Dockerfile`            | Defines how to build your app in a Docker container.                     |
+| `docker-compose.yml`    | Runs your app and database in Docker containers.                        |
+{% endif %}
 
 ## Customizing Your Project
-
-Want to add your own features? Here are some common ways to extend the template:
 
 ### Adding New Endpoints
 
@@ -155,7 +189,7 @@ Want to add your own features? Here are some common ways to extend the template:
        HttpResponse::Ok().body("Hello from the example endpoint!")
    }
    ```
-2. Update `src/routes/mod.rs` to include the new module:
+2. Update `src/routes/mod.rs`:
    ```rust
    pub mod health;
    pub mod example;
@@ -166,9 +200,8 @@ Want to add your own features? Here are some common ways to extend the template:
    ```
 4. Restart the server and test:
    ```sh
-   curl http://127.0.0.1:8080/example
+   curl http://127.0.0.1:{{server_port}}/example
    ```
-   Expected output: `Hello from the example endpoint!`
 
 ### Adding Database Queries
 
@@ -200,12 +233,12 @@ Want to add your own features? Here are some common ways to extend the template:
 3. Register the route in `src/init.rs` and `src/routes/mod.rs`.
 4. Test with:
    ```sh
-   curl http://127.0.0.1:8080/users
+   curl http://127.0.0.1:{{server_port}}/users
    ```
 
 ### Changing Settings
 
-- **Logging**: Modify `log4rs.yaml` to change log verbosity or output to a file:
+- **Logging**: Modify `log4rs.yaml` to change verbosity or output to a file:
   ```yaml
   appenders:
     file:
@@ -223,120 +256,76 @@ Want to add your own features? Here are some common ways to extend the template:
       - stdout
       - file
   ```
-  This logs to both the console and `app.log` with `debug` level.
 - **Rate Limiting**: Adjust settings in `src/init.rs`:
   ```rust
   .seconds_per_request(60) // Allow one request per minute
   .burst_size(10) // Allow bursts of up to 10 requests
   ```
+{% if include_cors %}
+- **CORS**: Modify CORS settings in `src/init.rs` (e.g., restrict origins):
+  ```rust
+  actix_cors::Cors::default()
+      .allowed_origin("https://example.com")
+  ```
+{% endif %}
 
 ## Troubleshooting
 
-If something goes wrong, try these solutions:
-
 - **“Database connection failed”**
   - **Check**: Ensure `DATABASE_URL` in `.env` is correct.
-  - **PostgreSQL/MySQL**: Verify the database server is running and credentials (username, password, port) are valid.
+  - **PostgreSQL/MySQL**: Verify the database server is running and credentials are valid.
   - **SQLite**: Confirm the file path is accessible and writable.
-  - **Test**: For PostgreSQL/MySQL, connect using a client (e.g., `psql` or `mysql`).
+  - **Test**: Use `psql` (PostgreSQL) or `mysql` (MySQL) to test connectivity.
 
 - **“Port already in use”**
-  - **Fix**: Change `PORT` in `.env` to another value (e.g., `8081`).
-  - **Or**: Stop the conflicting process:
+  - Change `PORT` in `.env` (e.g., `8081`).
+  - Stop conflicting processes:
     ```sh
     killall cargo
     ```
-  - **Check**: Use `netstat -tuln | grep 8080` to see if the port is occupied.
 
 - **“Build fails with dependency errors”**
-  - **Update Rust**: Run `rustup update`.
-  - **Clear Cache**: Run `cargo clean`.
-  - **Inspect**: Read the error messages in the terminal for clues (e.g., missing system libraries).
-  - **Dependencies**: Ensure you have required libraries:
-    - For PostgreSQL: Install `libpq-dev` (e.g., `sudo apt-get install libpq-dev` on Ubuntu).
-    - For MySQL: Install `libmysqlclient-dev`.
-    - For SQLite: Install `libsqlite3-dev`.
+  - Update Rust: `rustup update`.
+  - Clear cache: `cargo clean`.
+  - Install system libraries:
+    - PostgreSQL: `sudo apt-get install libpq-dev` (Ubuntu).
+    - MySQL: `sudo apt-get install libmysqlclient-dev`.
+    - SQLite: `sudo apt-get install libsqlite3-dev`.
 
 - **“No logs appear”**
-  - **Check**: Ensure `log4rs.yaml` exists in the project root and is valid.
-  - **Fix**: Set `level: debug` in `log4rs.yaml` for more detailed output:
+  - Verify `log4rs.yaml` exists and set `level: debug`:
     ```yaml
     root:
       level: debug
     ```
 
 - **“Template generation fails”**
-  - **Check**: Ensure you’re using the correct repository URL: `https://github.com/PRiEsTCSC/rust_webserver_template.git`.
-  - **Clear Cache**: Remove cached template data:
+  - Clear cache:
     ```sh
     rm -rf ~/.cargo/git/db/rust_webserver_template-*
     ```
-  - **Retry**: Run `cargo generate` again.
+  - Retry: `cargo generate --git https://github.com/PRiEsTCSC/rust_webserver_template.git`.
 
 ## Getting Help
 
-- **Logs**: Check the terminal or `app.log` (if configured) for error details.
-- **Repository**: Visit [https://github.com/PRiEsTCSC/rust_webserver_template](https://github.com/PRiEsTCSC/rust_webserver_template) to open an issue or find support.
-- **Community**: Ask questions in Rust communities like [r/rust](https://www.reddit.com/r/rust/) or the [Rust Discord](https://discord.gg/rust-lang).
+- Check logs in the terminal or `app.log` (if configured).
+- Visit [https://github.com/PRiEsTCSC/rust_webserver_template](https://github.com/PRiEsTCSC/rust_webserver_template) for issues or support.
+- Ask in Rust communities: [r/rust](https://www.reddit.com/r/rust/) or [Rust Discord](https://discord.gg/rust-lang).
 
 ## Contributing
 
-Love this template? Want to make it better?
-- Fork the repository at [https://github.com/PRiEsTCSC/rust_webserver_template](https://github.com/PRiEsTCSC/rust_webserver_template).
-- Make your changes and submit a pull request.
-- Share feedback or report bugs via GitHub issues.
+Want to improve this template?
+- Fork it at [https://github.com/PRiEsTCSC/rust_webserver_template](https://github.com/PRiEsTCSC/rust_webserver_template).
+- Submit pull requests or report bugs via GitHub issues.
 
 ## License
 
-This project is licensed under the **MIT License**. Feel free to use, modify, and share it!
+MIT License. Use, modify, and share freely!
 
 ## Next Steps
 
-- **Add an Endpoint**: Create a new route (see “Adding New Endpoints”).
-- **Work with Data**: Try database queries (see “Adding Database Queries”).
-- **Learn More**: Explore the [Actix web documentation](https://actix.rs/docs/) or [SQLx documentation](https://docs.rs/sqlx) for advanced features.
+- Add a new endpoint (see “Adding New Endpoints”).
+- Try database queries (see “Adding Database Queries”).
+- Explore [Actix web docs](https://actix.rs/docs/) or [SQLx docs](https://docs.rs/sqlx).
 
-Happy coding with {{project_name}}! 🚀
-
----
-
-### Instructions to Save as a Text File
-
-1. **Copy the Content**:
-   - Copy the entire text block above (starting from `# Welcome to {{project_name}}!` to `Happy coding with {{project_name}}! 🚀`).
-
-2. **Create the File**:
-   - Open a text editor (e.g., VS Code, Notepad, or `nano`).
-   - Paste the content into the editor.
-   - Save the file as `README.md` in your template repository’s root directory (e.g., `rust-web-template/`).
-
-3. **Using a Terminal** (optional):
-   - If you prefer the command line, create the file directly:
-     ```sh
-     nano README.md
-     ```
-   - Paste the content, save (Ctrl+O, Enter), and exit (Ctrl+X).
-   - Alternatively, redirect the content to a file if you have it in a script or copy-paste:
-     ```sh
-     cat > README.md
-     ```
-     Paste the content, then press Ctrl+D to save.
-
-4. **Verify the File**:
-   - Ensure the file is named `README.md` (case-sensitive) and is in the root of your template directory.
-   - Check that it renders correctly in a Markdown viewer (e.g., GitHub or VS Code).
-
-### Notes
-- **Markdown Formatting**: The content uses standard Markdown syntax (e.g., `#` for headers, ``` for code blocks, `|` for tables) to ensure it renders correctly in Markdown viewers like GitHub.
-- **Liquid Templating**: The `{{project_name}}` and `{{database}}` placeholders, along with `{% if database == "..." %}` conditionals, ensure the README adapts to user inputs during `cargo generate`.
-- **Error Context**: The previous `{{project_name}}` error (`invalid character '{' in package name`) is unrelated to the README but suggests a `cargo-generate` configuration issue. Ensure your `cargo-generate.toml` includes:
-  ```toml
-  [placeholders.project_name]
-  type = "string"
-  prompt = "What is your project name?"
-  regex = "^[a-zA-Z][a-zA-Z0-9_-]*$"
-  description = "The name of the project, used in Cargo.toml."
-  ```
-  And that `Cargo.toml` uses `name = "{{project_name}}"`.
-
-If you need help with the full template setup or resolving the `cargo-generate` error, please share your `cargo-generate.toml` or other relevant files!
+Happy coding with {{project-name}}! 🚀
