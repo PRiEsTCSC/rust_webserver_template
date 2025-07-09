@@ -2,12 +2,17 @@ mod init;
 mod configs;
 mod routes;
 mod models;
+mod middleware;
+
+{% if include_logging == "true" %}
 
 use log::{error, info};
 
 fn main() {
+    {% if include_logging == "true" %}
     // Initialize Logger
     log4rs::init_file("log4rs.yaml", Default::default()).expect("Failed to initialize logger");
+    {% endif %}
     
     // Initialize Server
     info!("Starting server...");

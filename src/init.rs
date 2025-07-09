@@ -4,6 +4,9 @@ use actix_web::web::Data;
 use crate::configs::env_load::_load_envs as load_envs;
 use crate::models::database::DatabaseConnection;
 use crate::routes;
+{{%% if include_cors == "true" %%}}
+use crate::middleware;
+{{%% endif %%}}
 
 #[actix_web::main]
 pub async fn init_app() -> std::io::Result<()> {
@@ -24,6 +27,9 @@ pub async fn init_app() -> std::io::Result<()> {
             App::new()
                 .wrap(Logger::default())
                 .wrap(Governor::new(&governor))
+                {{%% if include_cors == "true" %%}}
+                .wrap(middleware::cors_mgt::handle_cors())
+                {{%% endif %%}}
                 .app_data(Data::new(db.clone()))
                 .configure(routes::init_routes)
         }
