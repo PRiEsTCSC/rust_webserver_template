@@ -1,4 +1,4 @@
-# Welcome to {{project_name}}!
+# Welcome to {{project-name}}!
 
 This beginner-friendly Rust web application template uses the **Actix web framework** and **{{database}}** to help you quickly build APIs or web applications. Whether you’re new to Rust or an experienced developer, this template makes setup easy and lets you focus on building your project.
 
