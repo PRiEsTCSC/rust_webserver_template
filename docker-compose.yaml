@@ -7,8 +7,8 @@ services:
       - "{{server_port}}:{{server_port}}"
     env_file:
       - .env
-    depends_on:
-      {% if database == "postgres" %}- db{% elif database == "mysql" %}- db{% endif %}
+    {% if database == "postgres" or database == "mysql" %}depends_on:
+      - db{% endif %}
 
 {% if use_docker and (database == "postgres" or database == "mysql") %}
   db:
@@ -18,12 +18,14 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: {{db_name}}
+    ports:
+      - "5432:5432"
     {% elif database == "mysql" %}
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: {{db_name}}
-    {% endif %}
     ports:
-      - "{% if database == "postgres" %}5432{% else %}3306{% endif %}:{% if database == "postgres" %}5432{% else %}3306{% endif %}"
+      - "3306:3306"
+    {% endif %}
 {% endif %}
