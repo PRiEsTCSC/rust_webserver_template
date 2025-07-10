@@ -56,19 +56,19 @@ default = false
 # Conditional file generation (new additions)
 [conditional.'!include_env']
 # condition = "include_env"
-include = [".env"]
+ignore = [".env"]
 
 [conditional.'!include_logging']
 # condition = "include_logging"
-include = ["log4rs.yaml"]
+ignore = ["log4rs.yaml"]
 
 [conditional.'!include_cors']
 # condition = "include_cors"
-include = ["src/middleware/cors_mgt.rs"]
+ignore = ["src/middleware/cors_mgt.rs"]
 
 [conditional.'!use_docker']
 # condition = "use_docker"
-include = ["Dockerfile", "docker-compose.yml"]
+ignore = ["Dockerfile", "docker-compose.yaml"]
 
 # # Database-specific files
 # [[conditional]]
