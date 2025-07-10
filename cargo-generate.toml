@@ -54,21 +54,21 @@ prompt = "Do you want to include Docker configuration? This generates a Dockerfi
 default = false
 
 # Conditional file generation (new additions)
-[[templates.conditions]]
-condition = "include_env"
+[conditional.'!include_env']
+# condition = "include_env"
 include = [".env"]
 
-[[templates.conditions]]
-condition = "include_logging"
+[conditional.'!include_logging']
+# condition = "include_logging"
 include = ["log4rs.yaml"]
 
-[[templates.conditions]]
-condition = "include_cors"
+[conditional.'!include_cors']
+# condition = "include_cors"
 include = ["src/middleware/cors_mgt.rs"]
 
-[[templates.conditions]]
-condition = "use_docker"
-include = ["Dockerfile", "docker-compose.yaml.template"]
+[conditional.'!use_docker']
+# condition = "use_docker"
+include = ["Dockerfile", "docker-compose.yml"]
 
 # # Database-specific files
 # [[conditional]]
