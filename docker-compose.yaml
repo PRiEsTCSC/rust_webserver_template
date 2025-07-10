@@ -7,12 +7,18 @@ services:
       - "{{server_port}}:{{server_port}}"
     env_file:
       - .env
-    {% if database == "postgres" or database == "mysql" %}depends_on:
-      - db{% endif %}
+    # The 'if' block now wraps the entire 'depends_on' section.
+    # The '-' in {%- and -%} removes extra whitespace.
+    {% if database == "postgres" or database == "mysql" -%}
+    depends_on:
+      - db
+    {%- endif %}
 
-{% if use_docker and (database == "postgres" or database == "mysql") %}
+  # Only add the 'db' service if a server-based database is chosen.
+  {% if database != "sqlite" -%}
   db:
-    {% if database == "postgres" %}
+    # Conditionally include the postgres configuration.
+    {% if database == "postgres" -%}
     image: postgres:15
     environment:
       POSTGRES_USER: postgres
@@ -20,12 +26,15 @@ services:
       POSTGRES_DB: {{db_name}}
     ports:
       - "5432:5432"
-    {% elif database == "mysql" %}
+    {%- endif %}
+    
+    # Conditionally include the mysql configuration.
+    {% if database == "mysql" -%}
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: {{db_name}}
     ports:
       - "3306:3306"
-    {% endif %}
-{% endif %}
+    {%- endif %}
+  {%- endif %}
