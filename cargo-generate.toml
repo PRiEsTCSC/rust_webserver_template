@@ -1,6 +1,13 @@
 [template]
 cargo_generate_version = ">=0.18.0"
 
+[hooks]
+# Define commands to run after the template is generated
+post = [
+    # This command uses the 'database' variable to rename the correct file
+    # It will fail silently if the file doesn't exist (e.g., when docker is not used)
+    "mv docker-compose-{{database}}.yaml docker-compose.yaml || true",
+]
 
 [placeholders.description]
 type = "string"
@@ -53,6 +60,11 @@ type = "bool"
 prompt = "Do you want to include Docker configuration? This generates a Dockerfile and docker-compose.yml to run your app and database in containers."
 default = false
 
+
+
+
+
+
 # Conditional file generation (new additions)
 [conditional.'!include_env']
 # condition = "include_env"
@@ -68,7 +80,12 @@ ignore = ["src/middleware/cors_mgt.rs"]
 
 [conditional.'!use_docker']
 # condition = "use_docker"
-ignore = ["Dockerfile", "docker-compose.yaml"]
+ignore = [
+    "Dockerfile",
+    "docker-compose-postgres.yaml",
+    "docker-compose-mysql.yaml",
+    "docker-compose-sqlite.yaml"
+]
 
 # # Database-specific files
 # [[conditional]]
