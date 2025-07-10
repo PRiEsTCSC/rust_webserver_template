@@ -2,11 +2,15 @@
 cargo_generate_version = ">=0.18.0"
 
 [hooks]
-# Define commands to run after the template is generated
 post = [
-    # This command uses the 'database' variable to rename the correct file
-    # It will fail silently if the file doesn't exist (e.g., when docker is not used)
-    "mv docker-compose-{{database}}.yaml docker-compose.yaml || true",
+    "bash",
+    "-c",
+    """
+    if [ "$CARGO_GENERATE_USE_DOCKER" = "true" ]; then
+        mv "docker-compose-${CARGO_GENERATE_DATABASE}.yaml" "docker-compose.yaml"
+        rm -f docker-compose-*.yaml
+    fi
+    """
 ]
 
 [placeholders.description]
@@ -65,28 +69,24 @@ default = false
 
 
 
-# Conditional file generation (new additions)
+
+# Conditional file generation - CORRECTED SYNTAX
 [conditional.'!include_env']
-# condition = "include_env"
 ignore = [".env"]
 
 [conditional.'!include_logging']
-# condition = "include_logging"
 ignore = ["log4rs.yaml"]
 
 [conditional.'!include_cors']
-# condition = "include_cors"
 ignore = ["src/middleware/cors_mgt.rs"]
 
 [conditional.'!use_docker']
-# condition = "use_docker"
 ignore = [
     "Dockerfile",
     "docker-compose-postgres.yaml",
     "docker-compose-mysql.yaml",
     "docker-compose-sqlite.yaml"
 ]
-
 # # Database-specific files
 # [[conditional]]
 # condition = "database == 'postgres'"
