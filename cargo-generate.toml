@@ -68,7 +68,7 @@ include = ["src/middleware/cors_mgt.rs"]
 
 [[templates.conditions]]
 condition = "use_docker"
-include = ["Dockerfile", "docker-compose.yml"]
+include = ["Dockerfile", "docker-compose.yaml"]
 
 # # Database-specific files
 # [[conditional]]
