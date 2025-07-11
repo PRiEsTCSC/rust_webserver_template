@@ -6,9 +6,8 @@ pub fn handle_cors() -> Cors {
     let mut allowed_origin = env::var("FRONTEND_URL").expect("FRONTEND_URL is not set");
 
     }
-    Cors::permissive()
-        // .allowed_origin(&allowed_origin)
+    Cors::permissive
         .allow_any_origin()
         .allow_any_method()
         .allow_any_header()
-}
+     // .allowed_origin(&allowed_origin)
