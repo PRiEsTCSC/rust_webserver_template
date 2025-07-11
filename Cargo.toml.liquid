@@ -24,10 +24,3 @@ thiserror = "2.0.11"
 tokio = { version = "1.43.0", features = ["full"] }
 uuid = { version = "1.15.1", features = ["v4", "serde"] }
 
-[features]
-default = []
-cors = ["dep:actix-cors"]
-logging = ["dep:log", "dep:log4rs"]
-postgres = ["sqlx/postgres"]
-mysql = ["sqlx/mysql"]
-sqlite = ["sqlx/sqlite"]
