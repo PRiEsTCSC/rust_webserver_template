@@ -26,11 +26,13 @@ pub async fn init_app() -> std::io::Result<()> {
         move || {
             App::new()
                 .wrap(Logger::default())
+
                 .wrap(Governor::new(&governor))
-                {% if include_cors == "true" %}
-                .wrap(middleware::cors_mgt::handle_cors())
-                {% endif %}
+
+                {% if include_cors == "true" %}.wrap(middleware::cors_mgt::handle_cors()){% endif %}
+
                 .app_data(Data::new(db.clone()))
+                
                 .configure(routes::init_routes)
         }
     )
