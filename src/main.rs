@@ -3,6 +3,7 @@ mod configs;
 mod routes;
 mod models;
 mod middleware;
+use log::{info, error};
 
 fn main() {
     {% if include_logging == "true" %}

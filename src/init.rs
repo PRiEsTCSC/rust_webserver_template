@@ -33,7 +33,7 @@ pub async fn init_app() -> std::io::Result<()> {
 
                 .app_data(Data::new(db.clone()))
                 
-                .configure(routes::init_routes)
+                .configure(routes::health::init_routes)
         }
     )
     .workers(4)
